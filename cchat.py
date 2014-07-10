@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-from flask import Flask, request, render_template, redirect, url_for, sessions
+from flask import Flask, request, render_template, redirect, url_for, session
 from os import urandom
 from random import randint
 
 app = Flask(__name__)
+
+app.secret_key = 'ABC123'
 
 @app.route('/')
 def index():
@@ -15,6 +17,7 @@ def new():
     if request.method != 'POST' or not request.form['password']:
         return redirect(url_for('index'))
     rand = randint(10000, 99999)
+    session['id'] = rand
     return render_template('chat.html', id=rand)
 
 @app.route('/<int:id>')
