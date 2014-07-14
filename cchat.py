@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, request, render_template, redirect, url_for, session
+from flask import Flask, request, render_template, redirect, url_for
 from os import urandom
 from random import randint
 from crypt import crypt
@@ -21,7 +21,6 @@ def new():
     if request.method != 'POST' or not request.form['password']:
         return redirect(url_for('index'))
     rand = randint(10000, 99999)
-    session['id'] = rand
     sessions[rand] = crypt(request.form['password'], salt)
     return render_template('chat.html', id=rand)
 
@@ -33,7 +32,6 @@ def connect(id):
         return redirect(url_for('index'))
     if crypt(request.form['password'], salt) != sessions[id]:
         return redirect(url_for('index'))
-    session['id'] = sessions[id]
     return "success"
 
 if __name__ == '__main__':
