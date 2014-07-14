@@ -3,10 +3,12 @@
 from flask import Flask, request, render_template, redirect, url_for, session
 from os import urandom
 from random import randint
+from crypt import crypt
 
 app = Flask(__name__)
 
 app.secret_key = 'ABC123'
+salt = 'abcABC123'
 
 sessions = {}
 
@@ -20,7 +22,7 @@ def new():
         return redirect(url_for('index'))
     rand = randint(10000, 99999)
     session['id'] = rand
-    sessions[rand] = request.form['password']
+    sessions[rand] = crypt(request.form['password'], salt)
     return render_template('chat.html', id=rand)
 
 @app.route('/<int:id>', methods=['GET', 'POST'])
@@ -29,7 +31,7 @@ def connect(id):
         return render_template('passwd.html', id=id)
     if id not in sessions:
         return redirect(url_for('index'))
-    if request.form['password'] != sessions[id]:
+    if crypt(request.form['password'], salt) != sessions[id]:
         return redirect(url_for('index'))
     session['id'] = sessions[id]
     return "success"
