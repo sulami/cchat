@@ -15,7 +15,7 @@ content = {}
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('passwd.html', id='new')
 
 @app.route('/new', methods=['GET', 'POST'])
 def new():
