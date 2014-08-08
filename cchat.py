@@ -4,11 +4,13 @@ from flask import Flask, request, render_template, redirect, url_for
 from os import urandom
 from random import randint
 from crypt import crypt
+from Crypto.Cipher import AES
 
 app = Flask(__name__)
 
 app.secret_key = 'ABC123'
 salt = 'abcABC123'
+cbc = 'this is 16 bytes'
 
 sessions = {}
 content = {}
@@ -31,8 +33,9 @@ def write(id):
         return redirect(url_for('index'))
     if id not in sessions:
         return redirect(url_for('index'))
-    content[id] = request.form['message']
-    return render_template('read.html', id=id, message=content[id])
+    aes = AES.new(cbc, AES.MODE_CBC, cbc)
+    content[id] = aes.encrypt(request.form['message'])
+    return render_template('read.html', id=id, message=request.form['message'])
 
 @app.route('/<int:id>', methods=['GET', 'POST'])
 def read(id):
@@ -42,7 +45,9 @@ def read(id):
         return redirect(url_for('index'))
     if crypt(request.form['password'], salt) != sessions[id]:
         return redirect(url_for('index'))
-    return render_template('read.html', id=id, message=content[id])
+    aes = AES.new(cbc, AES.MODE_CBC, cbc)
+    message = aes.decrypt(content[id])
+    return render_template('read.html', id=id, message=message)
 
 if __name__ == '__main__':
     app.run(debug=True)
